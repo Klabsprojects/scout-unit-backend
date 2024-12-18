@@ -26,3 +26,54 @@ exports.register = async (req, res) => {
         errorRes(res, error, message, file);
     }
     }
+
+exports.getAllSchoolForms = async (req, res) => {
+  try {
+        const { fromDate, toDate, paymentStatus, districtId } = req.query;
+        console.log(fromDate, toDate, paymentStatus, districtId);
+        const startDate = fromDate ? new Date(fromDate) : null;
+        const endDate = toDate ? new Date(toDate) : null;
+        console.log(startDate, endDate);
+        let where = {}
+    
+        if(startDate && endDate){
+          console.log('date coming ', startDate, endDate);
+          where.createdAt = {
+              [Op.between]: [startDate, endDate]
+            }
+        }
+        if(paymentStatus){
+          console.log('status coming ', paymentStatus);
+          where.paymentStatus = paymentStatus;
+        }
+        // Filter by section if provided
+        if (districtId) {
+          console.log('section coming ', districtId);
+          where.districtId = districtId;
+        }
+        // Fetch all posts
+        const schoolforms = await db.schoolform.findAll({
+          include: [
+            {
+                model: db.login, // Include the Login model
+                as: 'byLogin', // Alias used in the association
+                required: false, 
+                attributes: ['userName', 'userType', 'id', 'districtId'], // Only select relevant fields
+            },
+            {
+              model: db.district, // Include the Login model
+              as: 'byDistrict', // Alias used in the association
+              required: false, 
+              attributes: ['name', 'distId', 'id'], // Only select relevant fields
+          },
+          ],
+          order: [['createdAt', 'DESC']], // Optionally, order by upload date
+          where: where
+        });
+        successRes(res, schoolforms, SUCCESS.LISTED);
+      } catch (error) {
+        console.error('Error fetching schoolforms:', error);
+        const message = error.message ? error.message : ERRORS.LISTED;
+        errorRes(res, error, message, file);
+      }
+};

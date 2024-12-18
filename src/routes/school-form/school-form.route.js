@@ -17,4 +17,10 @@ module.exports = (app) => {
     value.register
   );
 
+  app.get(
+    "/getAllSchoolForms",
+    [jwt.verifyToken],
+    value.getAllSchoolForms
+  )
+
 }
