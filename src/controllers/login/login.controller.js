@@ -45,6 +45,56 @@ exports.getDistricts = async (req, res) => {
   }
 };
 
+exports.addSubDistricts = async (req, res) => {
+    try {
+        console.log('try');
+        console.log(req.body);
+        let subDistId;
+        let name; 
+        let inputQuery, districtId;
+        if(req.body.subDistId && req.body.name && req.body.districtId){
+            subDistId = req.body.subDistId;
+            name = req.body.name;
+            districtId = req.body.districtId;
+            inputQuery = { subDistId: subDistId, name: name, districtId: districtId };
+            console.log('inputQuery', inputQuery);
+            const login = new db.subdistrict(inputQuery);
+            await login.save();
+            res.status(201).json({ message: 'District registered successfully' });
+        }
+        else   
+            throw 'Pls provide valid inputs';
+        
+    } catch (error) {
+        console.log('catch', error);
+        if(error.name == 'SequelizeUniqueConstraintError'){
+            res.status(500).json({ error: 'District already registered' });
+        }
+        else
+            res.status(500).json({ error: 'District Registration failed' });
+    }
+    }
+
+exports.getSubDistricts = async (req, res) => {
+    try {
+      let inputQuery = {}
+      if(req.query.districtId){
+        inputQuery.where = {
+            districtId: req.query.districtId
+        }
+        const districts = await db.subdistrict.findAll(inputQuery);
+        successRes(res, districts, SUCCESS.LISTED);
+      }
+      else
+        throw 'pls provide valid district id';
+    } catch (error) {
+      console.error('Error fetching subdistricts:', error);
+      const message = error.message ? error.message : ERRORS.LISTED;
+      errorRes(res, error, message, file);
+    }
+  };
+  
+
 exports.loginRegister = async (req, res) => {
     try {
         console.log('try');
@@ -53,6 +103,7 @@ exports.loginRegister = async (req, res) => {
         let userName; 
         let password; 
         let districtId;
+        let subDistrictId;
         let inputQuery;
         userType = req.body.userType;
         userName = req.body.userName;
@@ -61,17 +112,25 @@ exports.loginRegister = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log(password);
         console.log(hashedPassword);
-        if(req.body.distId){
-          districtId = req.body.distId;
-          inputQuery = { userType: userType, userName: userName, password: hashedPassword, districtId: districtId };
+        if(req.body.districtId && req.body.subDistrictId && req.body.userType && req.body.userType == 'District'){
+          //districtId = req.body.distId;
+            districtId = req.body.districtId;
+            subDistrictId = req.body.subDistrictId;
+          inputQuery = { userType: userType, 
+            userName: userName, 
+            password: hashedPassword, 
+            districtId: districtId,
+            subDistrictId: subDistrictId
+        };
           console.log('inputQuery', inputQuery);
         }
-        else
+        else if(req.body.userType && req.body.userType == 'Admin')
         {
           inputQuery = { userType: userType, userName: userName, password: hashedPassword};
           console.log('inputQuery', inputQuery);
         }
-        
+        else 
+            throw 'Pls provide valid inputs';
         const login = new db.login(inputQuery);
         await login.save();
         res.status(201).json({ message: 'Login registered successfully' });
@@ -90,11 +149,26 @@ exports.login = async (req, res) => {
         console.log('try');
         console.log(req.body);
         let query = {};
-        query.where = {
-            userType: req.body.userType,
-            userName: req.body.userName
-        };
-        console.log('query ', query);
+        if(req.body.userType && req.body.userType == 'Admin'){
+            query.where = {
+                userType: req.body.userType,
+                userName: req.body.userName
+            };
+            console.log('query ', query);
+        }
+        else if(req.body.userType && req.body.userType == 'District' && 
+            req.body.districtId && req.body.subDistrictId)
+        {
+            query.where = {
+                userType: req.body.userType,
+                userName: req.body.userName,
+                districtId: req.body.districtId,
+                subDistrictId: req.body.subDistrictId,
+            };
+            console.log('query ', query); 
+        }
+        else
+            throw 'Pls provide valid inputs';
         let user;
         if (req.body.userType && req.body.userName && req.body.password) {
             console.log('if');

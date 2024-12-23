@@ -30,6 +30,14 @@ module.exports = (sequelize, DataTypes) => {
             model: 'district', // Refers to the table name
             key: 'id',       // Refers to the primary key of the table
         },
+      },
+      subDistrictId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'subdistrict', // Refers to the table name
+            key: 'id',       // Refers to the primary key of the table
+        },
       }
     },
     );

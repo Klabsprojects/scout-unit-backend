@@ -36,8 +36,18 @@ module.exports = (app) => {
 
     app.get(
       "/getDistricts",
-      // [jwt.verifyToken],
       value.getDistricts
+    )
+
+    app.post(
+      "/addSubDistricts",
+      // [jwt.verifyToken],
+      value.addSubDistricts
+    );
+
+    app.get(
+      "/getSubDistricts",
+      value.getSubDistricts
     )
 
     app.post(

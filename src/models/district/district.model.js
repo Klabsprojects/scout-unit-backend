@@ -6,15 +6,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       distId: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
-        validate: {
-          // Custom validation for the distId format
-          is: {
-            args: /^[0-9]{2}-[0-9]{3}$/,  // Regex for format: 01-001
-            msg: 'distId must be in the format of "XX-XXX" where X is a digit.'
-          }
-        }
+        // Custom validation for the distId format
+        // validate: {
+        //   is: {
+        //     args: /^[0-9]{2}-[0-9]{3}$/,  // Regex for format: 01-001
+        //     msg: 'distId must be in the format of "XX-XXX" where X is a digit.'
+        //   }
+        // }
       },
     }
    );
